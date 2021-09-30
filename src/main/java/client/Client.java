@@ -13,21 +13,18 @@ public class Client {
     private OutputStream outputStream;
 
     public Client() {
+        try{
+            Socket socket = new Socket(host, port);
+            outputStream = socket.getOutputStream();
+            inputStream = socket.getInputStream();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
         Client client = new Client();
-        client.start();
-    }
-
-    private void start() {
-        try(Socket socket = new Socket(host, port)){
-            outputStream = socket.getOutputStream();
-            inputStream = socket.getInputStream();
-            this.logic();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        client.logic();
     }
 
     private void logic() {

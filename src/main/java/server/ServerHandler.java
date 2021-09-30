@@ -22,10 +22,11 @@ public class ServerHandler implements Runnable{
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
             while (true){
-                
+                int readed = inputStream.read(buffer);
+                System.out.println("Received: " + new String(buffer, 0, readed));
             }
         } catch (Exception e){
-            e.printStackTrace();
+            System.err.println("Client connection exception");
         } finally {
             try {
                 inputStream.close();
@@ -33,7 +34,6 @@ public class ServerHandler implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }
