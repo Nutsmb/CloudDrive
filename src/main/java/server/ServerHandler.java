@@ -1,29 +1,38 @@
 package server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 public class ServerHandler implements Runnable{
     private Socket socket;
     private byte[] buffer;
-    private InputStream inputStream;
-    private OutputStream outputStream;
+    private int BUFFER_SIZE = 1024;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+    String directory = "./src/main/resources/server/";
 
     public ServerHandler(Socket socket){
         this.socket = socket;
-        buffer = new byte[256];
+        buffer = new byte[BUFFER_SIZE];
     }
     @Override
     public void run() {
-
         try{
-            inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
+            inputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
             while (true){
-                int readed = inputStream.read(buffer);
-                System.out.println("Received: " + new String(buffer, 0, readed));
+                String command = inputStream.readUTF();
+                if(command.equals("#upload")){
+                    String fileName = inputStream.readUTF();
+                    long size = inputStream.readLong();
+                    try(FileOutputStream fos = new FileOutputStream(directory + fileName)){
+                        for (int i = 0; i < (size + (BUFFER_SIZE - 1)) / BUFFER_SIZE; i++) {
+                            int read = inputStream.read(buffer);
+                            fos.write(buffer,0, read);
+                        }
+                    }
+                    outputStream.writeUTF("File uploaded successfully!");
+                }
             }
         } catch (Exception e){
             System.err.println("Client connection exception");
